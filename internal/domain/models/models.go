@@ -48,3 +48,19 @@ type Task struct {
 	ClosedAt    time.Time
 	Version     uint
 }
+
+type TaskHistory struct {
+	ID        uuid.UUID
+	TaskID    uuid.UUID
+	ChangedBy uuid.UUID
+	Changes   string
+	CreatedAt time.Time
+}
+
+type TaskComments struct {
+	ID        uuid.UUID
+	TaskID    uuid.UUID
+	UserID    uuid.UUID
+	Content   string
+	CreatedAt time.Time
+}
