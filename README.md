@@ -56,22 +56,22 @@
 **Примеры запросов**
 
 **1. Регистрация пользователя**
-curl -X POST http://localhost:8080/api/v1/register -H "Content-Type: application/json" -d '{"email": "admin@example.com", "name": "Admin", "password": "password123"}'
+```curl -X POST http://localhost:8080/api/v1/register -H "Content-Type: application/json" -d '{"email": "admin@example.com", "name": "Admin", "password": "password123"}'```
 
 **2. Логин**
-curl -X POST http://localhost:8080/api/v1/login -H "Content-Type: application/json" -d '{"email": "admin@example.com", "password": "password123"}'
+```curl -X POST http://localhost:8080/api/v1/login -H "Content-Type: application/json" -d '{"email": "admin@example.com", "password": "password123"}'```
 
 **3. Создание команды**
-curl -X POST http://localhost:8080/api/v1/teams -H "Authorization: Bearer <YOUR_JWT_TOKEN>" -H "Content-Type: application/json" -d '{"name": "DevOps Team"}'
+```curl -X POST http://localhost:8080/api/v1/teams -H "Authorization: Bearer <YOUR_JWT_TOKEN>" -H "Content-Type: application/json" -d '{"name": "DevOps Team"}'```
 
 **4. Создание задачи**
-curl -X POST http://localhost:8080/api/v1/tasks -H "Authorization: Bearer <YOUR_JWT_TOKEN>" -H "Content-Type: application/json" -d '{"team_id": "<TEAM_ID>", "title": "Fix Prod Bug", "description": "Urgent bugfix needed"}'
+```curl -X POST http://localhost:8080/api/v1/tasks -H "Authorization: Bearer <YOUR_JWT_TOKEN>" -H "Content-Type: application/json" -d '{"team_id": "<TEAM_ID>", "title": "Fix Prod Bug", "description": "Urgent bugfix needed"}'```
 
 **5. Получение списка задач (с пагинацией и фильтрами)**
-curl -X GET "http://localhost:8080/api/v1/tasks?team_id=<TEAM_ID>&status=todo&limit=10&offset=0" -H "Authorization: Bearer <YOUR_JWT_TOKEN>"
+```curl -X GET "http://localhost:8080/api/v1/tasks?team_id=<TEAM_ID>&status=todo&limit=10&offset=0" -H "Authorization: Bearer <YOUR_JWT_TOKEN>"```
 
 **6. Получение SQL-отчета по статистике команды**
-curl -X GET "http://localhost:8080/api/v1/teams/<TEAM_ID>/stats" -H "Authorization: Bearer <YOUR_JWT_TOKEN>"
+```curl -X GET "http://localhost:8080/api/v1/teams/<TEAM_ID>/stats" -H "Authorization: Bearer <YOUR_JWT_TOKEN>"```
 
 Все запросы можно посмотреть в папке docs
 
