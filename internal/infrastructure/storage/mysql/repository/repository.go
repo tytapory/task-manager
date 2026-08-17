@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	go_mysql "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
@@ -25,6 +26,12 @@ func wrapErr(err error) error {
 	if errors.Is(err, gorm.ErrDuplicatedKey) {
 		return domain_errors.ErrConflict
 	}
+
+	var mysqlErr *go_mysql.MySQLError
+	if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+		return domain_errors.ErrConflict
+	}
+
 	return err
 }
 
