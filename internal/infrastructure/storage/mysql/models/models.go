@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -160,21 +161,35 @@ func TaskFromDomain(t models.Task) Task {
 }
 
 type TaskHistory struct {
-	ID        uint64    `gorm:"primaryKey;autoIncrement"`
+	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
 	TaskID    uuid.UUID `gorm:"type:char(36);not null;index"`
 	ChangedBy uuid.UUID `gorm:"type:char(36);not null"`
 	Changes   string    `gorm:"type:json;not null"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 }
 
-func (TaskHistory) TableName() string { return "task_history" }
+func (th *TaskHistory) BeforeCreate(tx *gorm.DB) (err error) {
+	if th.ID == uuid.Nil {
+		th.ID = uuid.New()
+	}
+	return
+}
+
+func (TaskHistory) TableName() string { return "task_histories" }
 
 type TaskComment struct {
-	ID        uint64    `gorm:"primaryKey;autoIncrement"`
+	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
 	TaskID    uuid.UUID `gorm:"type:char(36);not null;index"`
 	UserID    uuid.UUID `gorm:"type:char(36);not null"`
 	Content   string    `gorm:"type:text;not null"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
+}
+
+func (tc *TaskComment) BeforeCreate(tx *gorm.DB) (err error) {
+	if tc.ID == uuid.Nil {
+		tc.ID = uuid.New()
+	}
+	return
 }
 
 func (TaskComment) TableName() string { return "task_comments" }

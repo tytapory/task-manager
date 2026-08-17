@@ -1,10 +1,57 @@
 basePath: /
 definitions:
+  http.AddCommentRequest:
+    properties:
+      content:
+        type: string
+    type: object
   http.AssigneeStatResponse:
     properties:
       count:
         type: integer
       user_id:
+        type: string
+    type: object
+  http.ChangeRoleRequest:
+    properties:
+      role:
+        type: string
+    type: object
+  http.CreateTaskRequest:
+    properties:
+      description:
+        type: string
+      team_id:
+        type: string
+      title:
+        type: string
+    type: object
+  http.CreateTeamRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  http.InviteMemberRequest:
+    properties:
+      role:
+        type: string
+      user_id:
+        type: string
+    type: object
+  http.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  http.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
         type: string
     type: object
   http.TaskCommentResponse:
@@ -84,6 +131,19 @@ definitions:
       total_comments:
         type: integer
     type: object
+  http.UpdateTaskRequest:
+    properties:
+      assignee_id:
+        type: string
+      description:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      version:
+        type: integer
+    type: object
   http.UserResponse:
     properties:
       created_at:
@@ -113,7 +173,7 @@ paths:
         name: request
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/http.LoginRequest'
       produces:
       - application/json
       responses:
@@ -149,7 +209,7 @@ paths:
         name: request
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/http.RegisterRequest'
       produces:
       - application/json
       responses:
@@ -231,7 +291,7 @@ paths:
         name: request
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/http.CreateTaskRequest'
       produces:
       - application/json
       responses:
@@ -272,7 +332,7 @@ paths:
         name: request
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/http.UpdateTaskRequest'
       produces:
       - application/json
       responses:
@@ -347,7 +407,7 @@ paths:
         name: request
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/http.AddCommentRequest'
       produces:
       - application/json
       responses:
@@ -442,7 +502,7 @@ paths:
         name: request
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/http.CreateTeamRequest'
       produces:
       - application/json
       responses:
@@ -483,7 +543,7 @@ paths:
         name: request
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/http.InviteMemberRequest'
       produces:
       - application/json
       responses:
@@ -533,7 +593,7 @@ paths:
         name: request
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/http.ChangeRoleRequest'
       produces:
       - application/json
       responses:

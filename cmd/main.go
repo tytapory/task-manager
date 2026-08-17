@@ -65,7 +65,7 @@ func main() {
 	taskUC := usecases.NewTaskUsecase(taskCacheRepo, teamRepo, historyRepo, commentRepo, tx)
 
 	handler := transport.NewHandler(userUC, teamUC, taskUC)
-	router := transport.NewRouter(handler)
+	router := transport.NewRouter(handler, appCfg.JWT.Secret)
 
 	serverAddr := appCfg.Server.Host + ":" + appCfg.Server.Port
 	server := &http.Server{

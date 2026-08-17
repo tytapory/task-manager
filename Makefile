@@ -6,7 +6,7 @@ DB_NAME ?= task_manager
 
 DB_URL := "mysql://$(DB_USER):$(DB_PASSWORD)@tcp($(DB_HOST):$(DB_PORT))/$(DB_NAME)"
 
-.PHONY: up down restart build rebuild logs ps clean help generate_doc migrate-up migrate-down migrate-create
+.PHONY: up down restart build rebuild logs ps clean help generate_doc migrate-up migrate-down migrate-create test-integration
 
 up:
 	sudo docker compose up -d
@@ -41,3 +41,6 @@ migrate-down:
 migrate-create:
 	@read -p "Enter migration name (e.g. add_users_table): " name; \
 	migrate create -ext sql -dir migrations -seq $$name
+
+test-integration:
+	sudo go test -v -tags=integration ./internal/usecases/...

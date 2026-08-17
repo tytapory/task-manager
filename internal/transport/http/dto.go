@@ -8,6 +8,48 @@ import (
 	"github.com/google/uuid"
 )
 
+type RegisterRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type CreateTeamRequest struct {
+	Name string `json:"name"`
+}
+
+type InviteMemberRequest struct {
+	UserID string `json:"user_id"`
+	Role   string `json:"role"`
+}
+
+type CreateTaskRequest struct {
+	TeamID      string `json:"team_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+type UpdateTaskRequest struct {
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Status      string    `json:"status"`
+	AssigneeID  uuid.UUID `json:"assignee_id"`
+	Version     uint      `json:"version"`
+}
+
+type AddCommentRequest struct {
+	Content string `json:"content"`
+}
+
+type ChangeRoleRequest struct {
+	Role string `json:"role"`
+}
+
 type UserResponse struct {
 	ID        uuid.UUID `json:"id"`
 	Email     string    `json:"email"`
