@@ -10,6 +10,7 @@ import (
 
 	domain_errors "manager/internal/domain/errors"
 	domain "manager/internal/domain/models"
+	"manager/internal/infrastructure/storage/mysql"
 	dbmodels "manager/internal/infrastructure/storage/mysql/models"
 	core_repo "manager/internal/repository"
 )
@@ -27,6 +28,13 @@ func wrapErr(err error) error {
 	return err
 }
 
+func getDB(ctx context.Context, db *gorm.DB) *gorm.DB {
+	if tx := mysql.ExtractTx(ctx); tx != nil {
+		return tx.WithContext(ctx)
+	}
+	return db.WithContext(ctx)
+}
+
 type userRepository struct {
 	db *gorm.DB
 }
@@ -40,7 +48,7 @@ func (r *userRepository) Create(ctx context.Context, user domain.User) error {
 		return err
 	}
 	dbUser := dbmodels.UserFromDomain(user)
-	return wrapErr(r.db.WithContext(ctx).Create(&dbUser).Error)
+	return wrapErr(getDB(ctx, r.db).Create(&dbUser).Error)
 }
 
 func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.User, error) {
@@ -48,7 +56,7 @@ func (r *userRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.User
 		return domain.User{}, err
 	}
 	var dbUser dbmodels.User
-	err := r.db.WithContext(ctx).Where("id = ?", id).First(&dbUser).Error
+	err := getDB(ctx, r.db).Where("id = ?", id).First(&dbUser).Error
 	if err != nil {
 		return domain.User{}, wrapErr(err)
 	}
@@ -60,7 +68,7 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (domain.U
 		return domain.User{}, err
 	}
 	var dbUser dbmodels.User
-	err := r.db.WithContext(ctx).Where("email = ?", email).First(&dbUser).Error
+	err := getDB(ctx, r.db).Where("email = ?", email).First(&dbUser).Error
 	if err != nil {
 		return domain.User{}, wrapErr(err)
 	}
@@ -80,7 +88,7 @@ func (r *teamRepository) GetTeamsByUserID(ctx context.Context, userID uuid.UUID)
 		return nil, err
 	}
 	var dbTeams []dbmodels.Team
-	err := r.db.WithContext(ctx).
+	err := getDB(ctx, r.db).
 		Joins("JOIN team_members ON team_members.team_id = teams.id").
 		Where("team_members.user_id = ?", userID).
 		Find(&dbTeams).Error
@@ -149,7 +157,7 @@ func (r *teamRepository) GetStats(ctx context.Context, teamID uuid.UUID) (domain
 		TotalComments           int
 	}
 
-	err := r.db.WithContext(ctx).Raw(query, teamID, teamID, teamID, teamID, teamID).Scan(&raw).Error
+	err := getDB(ctx, r.db).Raw(query, teamID, teamID, teamID, teamID, teamID).Scan(&raw).Error
 	if err != nil {
 		return domain.TeamStats{}, wrapErr(err)
 	}
@@ -180,7 +188,7 @@ func (r *teamRepository) Create(ctx context.Context, team domain.Team) error {
 		return err
 	}
 	dbTeam := dbmodels.TeamFromDomain(team)
-	return wrapErr(r.db.WithContext(ctx).Create(&dbTeam).Error)
+	return wrapErr(getDB(ctx, r.db).Create(&dbTeam).Error)
 }
 
 func (r *teamRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.Team, error) {
@@ -188,7 +196,7 @@ func (r *teamRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.Team
 		return domain.Team{}, err
 	}
 	var dbTeam dbmodels.Team
-	err := r.db.WithContext(ctx).Where("id = ?", id).First(&dbTeam).Error
+	err := getDB(ctx, r.db).Where("id = ?", id).First(&dbTeam).Error
 	if err != nil {
 		return domain.Team{}, wrapErr(err)
 	}
@@ -200,7 +208,7 @@ func (r *teamRepository) AddMember(ctx context.Context, member domain.TeamMember
 		return err
 	}
 	dbMember := dbmodels.TeamMemberFromDomain(member)
-	return wrapErr(r.db.WithContext(ctx).Create(&dbMember).Error)
+	return wrapErr(getDB(ctx, r.db).Create(&dbMember).Error)
 }
 
 func (r *teamRepository) GetMemberRole(ctx context.Context, teamID, userID uuid.UUID) (domain.TeamRole, error) {
@@ -208,7 +216,7 @@ func (r *teamRepository) GetMemberRole(ctx context.Context, teamID, userID uuid.
 		return "", err
 	}
 	var dbMember dbmodels.TeamMember
-	err := r.db.WithContext(ctx).Where("team_id = ? AND user_id = ?", teamID, userID).First(&dbMember).Error
+	err := getDB(ctx, r.db).Where("team_id = ? AND user_id = ?", teamID, userID).First(&dbMember).Error
 	if err != nil {
 		return "", wrapErr(err)
 	}
@@ -219,7 +227,7 @@ func (r *teamRepository) UpdateMemberRole(ctx context.Context, teamID, userID uu
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	res := r.db.WithContext(ctx).Model(&dbmodels.TeamMember{}).
+	res := getDB(ctx, r.db).Model(&dbmodels.TeamMember{}).
 		Where("team_id = ? AND user_id = ?", teamID, userID).
 		Update("role", role)
 
@@ -245,7 +253,7 @@ func (r *taskRepository) Create(ctx context.Context, task domain.Task) error {
 		return err
 	}
 	dbTask := dbmodels.TaskFromDomain(task)
-	return wrapErr(r.db.WithContext(ctx).Create(&dbTask).Error)
+	return wrapErr(getDB(ctx, r.db).Create(&dbTask).Error)
 }
 
 func (r *taskRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.Task, error) {
@@ -253,7 +261,7 @@ func (r *taskRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.Task
 		return domain.Task{}, err
 	}
 	var dbTask dbmodels.Task
-	err := r.db.WithContext(ctx).Where("id = ?", id).First(&dbTask).Error
+	err := getDB(ctx, r.db).Where("id = ?", id).First(&dbTask).Error
 	if err != nil {
 		return domain.Task{}, wrapErr(err)
 	}
@@ -266,9 +274,9 @@ func (r *taskRepository) Update(ctx context.Context, task domain.Task) error {
 	}
 	dbTask := dbmodels.TaskFromDomain(task)
 
-	res := r.db.WithContext(ctx).Model(&dbmodels.Task{}).
+	res := getDB(ctx, r.db).Model(&dbmodels.Task{}).
 		Where("id = ? AND version = ?", dbTask.ID, task.Version-1).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"title":       dbTask.Title,
 			"description": dbTask.Description,
 			"status":      dbTask.Status,
@@ -292,7 +300,7 @@ func (r *taskRepository) ListByTeam(ctx context.Context, teamID uuid.UUID, statu
 	}
 	var dbTasks []dbmodels.Task
 
-	query := r.db.WithContext(ctx).Where("team_id = ?", teamID)
+	query := getDB(ctx, r.db).Where("team_id = ?", teamID)
 
 	if status != "" {
 		query = query.Where("status = ?", status)
@@ -330,7 +338,7 @@ func (r *taskHistoryRepository) Create(ctx context.Context, history domain.TaskH
 		ChangedBy: history.ChangedBy,
 		Changes:   history.Changes,
 	}
-	return wrapErr(r.db.WithContext(ctx).Create(&dbHistory).Error)
+	return wrapErr(getDB(ctx, r.db).Create(&dbHistory).Error)
 }
 
 func (r *taskHistoryRepository) GetByTaskID(ctx context.Context, taskID uuid.UUID) ([]domain.TaskHistory, error) {
@@ -338,7 +346,7 @@ func (r *taskHistoryRepository) GetByTaskID(ctx context.Context, taskID uuid.UUI
 		return nil, err
 	}
 	var dbHistories []dbmodels.TaskHistory
-	err := r.db.WithContext(ctx).Where("task_id = ?", taskID).Find(&dbHistories).Error
+	err := getDB(ctx, r.db).Where("task_id = ?", taskID).Find(&dbHistories).Error
 	if err != nil {
 		return nil, wrapErr(err)
 	}
@@ -346,6 +354,7 @@ func (r *taskHistoryRepository) GetByTaskID(ctx context.Context, taskID uuid.UUI
 	histories := make([]domain.TaskHistory, len(dbHistories))
 	for i, h := range dbHistories {
 		histories[i] = domain.TaskHistory{
+			ID:        h.ID,
 			TaskID:    h.TaskID,
 			ChangedBy: h.ChangedBy,
 			Changes:   h.Changes,
@@ -368,11 +377,12 @@ func (r *taskCommentRepository) Create(ctx context.Context, comment domain.TaskC
 		return err
 	}
 	dbComment := dbmodels.TaskComment{
+		ID:      comment.ID,
 		TaskID:  comment.TaskID,
 		UserID:  comment.UserID,
 		Content: comment.Content,
 	}
-	return wrapErr(r.db.WithContext(ctx).Create(&dbComment).Error)
+	return wrapErr(getDB(ctx, r.db).Create(&dbComment).Error)
 }
 
 func (r *taskCommentRepository) GetByTaskID(ctx context.Context, taskID uuid.UUID) ([]domain.TaskComment, error) {
@@ -380,7 +390,7 @@ func (r *taskCommentRepository) GetByTaskID(ctx context.Context, taskID uuid.UUI
 		return nil, err
 	}
 	var dbComments []dbmodels.TaskComment
-	err := r.db.WithContext(ctx).Where("task_id = ?", taskID).Find(&dbComments).Error
+	err := getDB(ctx, r.db).Where("task_id = ?", taskID).Find(&dbComments).Error
 	if err != nil {
 		return nil, wrapErr(err)
 	}
@@ -388,6 +398,7 @@ func (r *taskCommentRepository) GetByTaskID(ctx context.Context, taskID uuid.UUI
 	comments := make([]domain.TaskComment, len(dbComments))
 	for i, c := range dbComments {
 		comments[i] = domain.TaskComment{
+			ID:        c.ID,
 			TaskID:    c.TaskID,
 			UserID:    c.UserID,
 			Content:   c.Content,

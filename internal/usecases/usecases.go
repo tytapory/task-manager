@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	domain_errors "manager/internal/domain/errors"
 	"manager/internal/domain/models"
 	"manager/internal/repository"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -73,7 +73,7 @@ func (u *userUsecase) Register(ctx context.Context, email, password, name string
 		Email:        email,
 		PasswordHash: hash,
 		Name:         name,
-	}
+		CreatedAt:    time.Now().UTC()}
 
 	if err := u.userRepo.Create(ctx, user); err != nil {
 		return models.User{}, fmt.Errorf("failed to create user: %w", err)
@@ -121,7 +121,7 @@ func (u *teamUsecase) CreateTeam(ctx context.Context, userID uuid.UUID, name str
 		ID:        uuid.New(),
 		Name:      name,
 		CreatedBy: userID,
-	}
+		CreatedAt: time.Now().UTC()}
 
 	member := models.TeamMember{
 		TeamID: team.ID,
@@ -249,6 +249,8 @@ func (u *taskUsecase) CreateTask(ctx context.Context, userID, teamID uuid.UUID, 
 		Status:      "todo",
 		CreatedBy:   userID,
 		Version:     1,
+		CreatedAt:   time.Now().UTC(),
+		UpdatedAt:   time.Now().UTC(),
 	}
 
 	err = u.tx.WithinTransaction(ctx, func(txCtx context.Context) error {
@@ -258,9 +260,11 @@ func (u *taskUsecase) CreateTask(ctx context.Context, userID, teamID uuid.UUID, 
 
 		changes, _ := json.Marshal(map[string]string{"action": "created"})
 		history := models.TaskHistory{
+			ID:        uuid.New(),
 			TaskID:    task.ID,
 			ChangedBy: userID,
 			Changes:   string(changes),
+			CreatedAt: time.Now().UTC(),
 		}
 		if err := u.historyRepo.Create(txCtx, history); err != nil {
 			return fmt.Errorf("failed to record task history: %w", err)
@@ -330,6 +334,7 @@ func (u *taskUsecase) UpdateTask(ctx context.Context, userID uuid.UUID, update m
 		}
 
 		update.Version++
+		update.UpdatedAt = time.Now().UTC()
 
 		if err := u.taskRepo.Update(txCtx, update); err != nil {
 			return fmt.Errorf("failed to update task: %w", err)
@@ -352,9 +357,11 @@ func (u *taskUsecase) UpdateTask(ctx context.Context, userID uuid.UUID, update m
 		if len(changesMap) > 0 {
 			changes, _ := json.Marshal(changesMap)
 			history := models.TaskHistory{
+				ID:        uuid.New(),
 				TaskID:    update.ID,
 				ChangedBy: userID,
 				Changes:   string(changes),
+				CreatedAt: time.Now().UTC(),
 			}
 
 			if err := u.historyRepo.Create(txCtx, history); err != nil {
@@ -396,9 +403,11 @@ func (u *taskUsecase) AddComment(ctx context.Context, userID, taskID uuid.UUID, 
 	}
 
 	comment := models.TaskComment{
-		TaskID:  taskID,
-		UserID:  userID,
-		Content: content,
+		ID:        uuid.New(),
+		TaskID:    taskID,
+		UserID:    userID,
+		Content:   content,
+		CreatedAt: time.Now().UTC(),
 	}
 
 	if err := u.commentRepo.Create(ctx, comment); err != nil {
