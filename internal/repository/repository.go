@@ -17,17 +17,18 @@ type UserRepository interface {
 type TeamRepository interface {
 	Create(ctx context.Context, team models.Team) error
 	GetByID(ctx context.Context, id uuid.UUID) (models.Team, error)
-
 	AddMember(ctx context.Context, member models.TeamMember) error
 	GetMemberRole(ctx context.Context, teamID, userID uuid.UUID) (models.TeamRole, error)
+	GetTeamsByUserID(ctx context.Context, userID uuid.UUID) ([]models.Team, error)
+	GetStats(ctx context.Context, teamID uuid.UUID) (models.TeamStats, error)
+	UpdateMemberRole(ctx context.Context, teamID, userID uuid.UUID, role models.TeamRole) error
 }
 
 type TaskRepository interface {
 	Create(ctx context.Context, task models.Task) error
 	GetByID(ctx context.Context, id uuid.UUID) (models.Task, error)
 	Update(ctx context.Context, task models.Task) error
-
-	ListByTeam(ctx context.Context, teamID uuid.UUID, limit, offset int) ([]models.Task, error)
+	ListByTeam(ctx context.Context, teamID uuid.UUID, status string, assigneeID *uuid.UUID, limit, offset int) ([]models.Task, error)
 }
 
 type TaskHistoryRepository interface {

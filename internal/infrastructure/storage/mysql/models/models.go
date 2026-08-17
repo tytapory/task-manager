@@ -106,16 +106,16 @@ func (Task) TableName() string { return "tasks" }
 
 func (t *Task) ToDomain() models.Task {
 	var (
-		ClosedAt   time.Time
-		AssigneeID uuid.UUID
+		closedAt   time.Time
+		assigneeID uuid.UUID
 	)
 
 	if t.ClosedAt != nil {
-		ClosedAt = *t.ClosedAt
+		closedAt = *t.ClosedAt
 	}
 
 	if t.AssigneeID != nil {
-		AssigneeID = *t.AssigneeID
+		assigneeID = *t.AssigneeID
 	}
 
 	return models.Task{
@@ -125,17 +125,24 @@ func (t *Task) ToDomain() models.Task {
 		Description: t.Description,
 		Status:      t.Status,
 		CreatedBy:   t.CreatedBy,
-		AssigneeID:  AssigneeID,
+		AssigneeID:  assigneeID,
 		CreatedAt:   t.CreatedAt,
 		UpdatedAt:   t.UpdatedAt,
-		ClosedAt:    ClosedAt,
+		ClosedAt:    closedAt,
 		Version:     t.Version,
 	}
 }
 
 func TaskFromDomain(t models.Task) Task {
-	ClosedAt := t.ClosedAt
-	AssigneeID := t.AssigneeID
+	var closedAt *time.Time
+	if !t.ClosedAt.IsZero() {
+		closedAt = &t.ClosedAt
+	}
+
+	var assigneeID *uuid.UUID
+	if t.AssigneeID != uuid.Nil {
+		assigneeID = &t.AssigneeID
+	}
 
 	return Task{
 		ID:          t.ID,
@@ -144,10 +151,10 @@ func TaskFromDomain(t models.Task) Task {
 		Description: t.Description,
 		Status:      t.Status,
 		CreatedBy:   t.CreatedBy,
-		AssigneeID:  &AssigneeID,
+		AssigneeID:  assigneeID,
 		CreatedAt:   t.CreatedAt,
 		UpdatedAt:   t.UpdatedAt,
-		ClosedAt:    &ClosedAt,
+		ClosedAt:    closedAt,
 		Version:     t.Version,
 	}
 }

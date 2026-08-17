@@ -1,4 +1,4 @@
-FROM golang:1.27rc3-trixie
+FROM golang:1.27rc3-trixie AS builder
 
 COPY go.mod go.sum ./
 RUN go mod download

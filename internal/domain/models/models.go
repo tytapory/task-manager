@@ -57,10 +57,22 @@ type TaskHistory struct {
 	CreatedAt time.Time
 }
 
-type TaskComments struct {
+type TaskComment struct {
 	ID        uuid.UUID
 	TaskID    uuid.UUID
 	UserID    uuid.UUID
 	Content   string
 	CreatedAt time.Time
+}
+
+type TeamStats struct {
+	TasksByStatus           map[string]int
+	TopAssignees            []AssigneeStat
+	AverageCloseTimeSeconds float64
+	TotalComments           int
+}
+
+type AssigneeStat struct {
+	UserID uuid.UUID
+	Count  int
 }

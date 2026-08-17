@@ -10,8 +10,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
-
-	"manager/internal/infrastructure/storage/mysql/models"
 )
 
 func NewDatabase(cfg config.DatabaseConfig) (*gorm.DB, error) {
@@ -32,19 +30,7 @@ func NewDatabase(cfg config.DatabaseConfig) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to open mysql connection: %w", err)
 	}
 
-	err = db.AutoMigrate(
-		&models.User{},
-		&models.Team{},
-		&models.TeamMember{},
-		&models.Task{},
-		&models.TaskHistory{},
-		&models.TaskComment{},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to run auto-migrations: %w", err)
-	}
-
-	slog.Info("successfully connected to mysql database and applied auto-migrations")
+	slog.Info("successfully connected to mysql database (migrations are handled externally)")
 	return db, nil
 }
 
